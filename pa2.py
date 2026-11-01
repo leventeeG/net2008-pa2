@@ -105,3 +105,29 @@ def main(argv):
     )
     print("report written to audit.json")
     return 0
+
+
+class Device:
+    """stores information about one network device"""
+
+    def __init__(self, element):
+        """gets the device id, role, os, owner and interface statuses"""
+        self.id = element.get("id")
+        self.role = element.get("role", "")
+        self.os = element.get("os")
+        owner = element.find("owner")
+        text = owner.text if owner is not None else None
+        self.owner = (text or "").strip()
+        self.statuses = []
+        for interface in element.findall("interface"):
+            self.statuses.append(interface.get("status"))
+
+    def count_interfaces(self):
+        """counts the up, down and other interfaces"""
+        counts = {"up": 0, "down": 0, "other": 0}
+        for status in self.statuses:
+            if status == "up" or status == "down":
+                counts[status] += 1
+            else:
+                counts["other"] += 1
+        return counts
