@@ -181,3 +181,17 @@ class Device:
                 "required": required,
             }
         return None
+
+    def violations(self, policy):
+        """runs all policy checks and returns the violations"""
+        found = []
+        checks = (
+            self.check_role(policy),
+            self.check_os(policy),
+            self.check_owner(policy),
+            self.check_down(policy),
+        )
+        for problem in checks:
+            if problem is not None:
+                found.append(problem)
+        return found
