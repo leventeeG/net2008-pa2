@@ -154,3 +154,30 @@ class Device:
         if down > limit:
             return {"device": self.id, "type": "too_many_down", "down": down}
         return None
+
+    def parse_version(self, text):
+        """converts a version string into a list of numbers"""
+        parts = []
+        for piece in str(text).strip().split("."):
+            if piece.isdigit():
+                parts.append(int(piece))
+            else:
+                parts.append(0)
+        while parts and parts[-1] == 0:
+            parts.pop()
+        return parts
+
+    def check_os(self, policy):
+        """checks whether the device os is below the required version"""
+        min_os = policy.get("min_os")
+        if not isinstance(min_os, dict) or self.role not in min_os or self.os is None:
+            return None
+        required = str(min_os[self.role])
+        if self.parse_version(self.os) < self.parse_version(required):
+            return {
+                "device": self.id,
+                "type": "os_outdated",
+                "found": self.os,
+                "required": required,
+            }
+        return None
