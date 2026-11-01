@@ -131,3 +131,26 @@ class Device:
             else:
                 counts["other"] += 1
         return counts
+
+    def check_role(self, policy):
+        """checks whether the device role is allowed"""
+        min_os = policy.get("min_os")
+        if isinstance(min_os, dict) and self.role not in min_os:
+            return {"device": self.id, "type": "unknown_role", "role": self.role}
+        return None
+
+    def check_owner(self, policy):
+        """checks whether the device has an owner"""
+        if policy.get("require_owner") is True and not self.owner:
+            return {"device": self.id, "type": "missing_owner"}
+        return None
+
+    def check_down(self, policy):
+        """checks whether the device has too many down interfaces"""
+        limit = policy.get("max_down_interfaces")
+        if isinstance(limit, bool) or not isinstance(limit, (int, float)):
+            return None
+        down = self.count_interfaces()["down"]
+        if down > limit:
+            return {"device": self.id, "type": "too_many_down", "down": down}
+        return None
