@@ -195,3 +195,7 @@ class Device:
             if problem is not None:
                 found.append(problem)
         return found
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))
